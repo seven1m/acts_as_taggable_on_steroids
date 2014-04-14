@@ -80,16 +80,16 @@ module ActiveRecord #:nodoc:
           taggings_alias, tags_alias = "#{table_name}_taggings", "#{table_name}_tags"
           
           joins = [
-            "INNER JOIN #{Tagging.table_name} #{taggings_alias} ON #{taggings_alias}.taggable_id = #{table_name}.#{primary_key} AND #{taggings_alias}.taggable_type = #{quote_value(base_class.name)}",
-            "INNER JOIN #{Tag.table_name} #{tags_alias} ON #{tags_alias}.id = #{taggings_alias}.tag_id"
+            "INNER JOIN #{Tagging.quoted_table_name} #{taggings_alias} ON #{taggings_alias}.taggable_id = #{table_name}.#{primary_key} AND #{taggings_alias}.taggable_type = #{quote_value(base_class.name)}",
+            "INNER JOIN #{Tag.quoted_table_name} #{tags_alias} ON #{tags_alias}.id = #{taggings_alias}.tag_id"
           ]
           
           if options.delete(:exclude)
             conditions << <<-END
               #{table_name}.id NOT IN
-                (SELECT #{Tagging.table_name}.taggable_id FROM #{Tagging.table_name}
-                 INNER JOIN #{Tag.table_name} ON #{Tagging.table_name}.tag_id = #{Tag.table_name}.id
-                 WHERE #{tags_condition(tags)} AND #{Tagging.table_name}.taggable_type = #{quote_value(base_class.name)})
+                (SELECT #{Tagging.quoted_table_name}.taggable_id FROM #{Tagging.quoted_table_name}
+                 INNER JOIN #{Tag.quoted_table_name} ON #{Tagging.quoted_table_name}.tag_id = #{Tag.quoted_table_name}.id
+                 WHERE #{tags_condition(tags)} AND #{Tagging.quoted_table_name}.taggable_type = #{quote_value(base_class.name)})
             END
           else
             if options.delete(:match_all)
@@ -99,7 +99,7 @@ module ActiveRecord #:nodoc:
             end
           end
           
-          { :select => "DISTINCT #{table_name}.*",
+          { :select => "DISTINCT #{quoted_table_name}.*",
             :joins => joins.join(" "),
             :conditions => conditions.join(" AND ")
           }.reverse_merge!(options)
