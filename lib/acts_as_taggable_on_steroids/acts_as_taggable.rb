@@ -65,7 +65,8 @@ module ActiveRecord #:nodoc:
         #   :conditions - A piece of SQL conditions to add to the query
         def find_tagged_with(*args)
           options = find_options_for_find_tagged_with(*args)
-          options.blank? ? [] : find(:all, options)
+          #options.blank? ? [] : find(:all, options)
+          select(options[:select]).joins(options[:joins]).where(options[:conditions])
         end
         
         def find_options_for_find_tagged_with(tags, options = {})
