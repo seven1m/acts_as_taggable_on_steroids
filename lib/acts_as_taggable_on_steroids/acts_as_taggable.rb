@@ -53,7 +53,7 @@ module ActiveRecord #:nodoc:
               AND  #{Tagging.table_name}.taggable_id IN (#{related_ids})
               AND  #{Tagging.table_name}.tag_id = #{Tag.table_name}.id",
             :order => options[:order] || "count DESC, #{Tag.table_name}.name",
-            :group => "#{Tag.table_name}.id, #{Tag.table_name}.name HAVING #{Tag.table_name}.name NOT IN (#{tags.map { |n| quote_value(n) }.join(",")})"
+            :group => "#{Tag.table_name}.id, #{Tag.table_name}.name HAVING #{Tag.table_name}.name NOT IN (#{tags.map { |n| quote_column_value(n) }.join(",")})"
           }))
         end
         
@@ -81,7 +81,7 @@ module ActiveRecord #:nodoc:
           taggings_alias, tags_alias = "#{table_name}_taggings", "#{table_name}_tags"
           
           joins = [
-            "INNER JOIN #{Tagging.quoted_table_name} #{taggings_alias} ON #{taggings_alias}.taggable_id = #{table_name}.#{primary_key} AND #{taggings_alias}.taggable_type = #{quote_value(base_class.name)}",
+            "INNER JOIN #{Tagging.quoted_table_name} #{taggings_alias} ON #{taggings_alias}.taggable_id = #{table_name}.#{primary_key} AND #{taggings_alias}.taggable_type = #{quote_column_value(base_class.name)}",
             "INNER JOIN #{Tag.quoted_table_name} #{tags_alias} ON #{tags_alias}.id = #{taggings_alias}.tag_id"
           ]
           
@@ -90,7 +90,7 @@ module ActiveRecord #:nodoc:
               #{table_name}.id NOT IN
                 (SELECT #{Tagging.quoted_table_name}.taggable_id FROM #{Tagging.quoted_table_name}
                  INNER JOIN #{Tag.quoted_table_name} ON #{Tagging.quoted_table_name}.tag_id = #{Tag.quoted_table_name}.id
-                 WHERE #{tags_condition(tags)} AND #{Tagging.quoted_table_name}.taggable_type = #{quote_value(base_class.name)})
+                 WHERE #{tags_condition(tags)} AND #{Tagging.quoted_table_name}.taggable_type = #{quote_column_value(base_class.name)})
             END
           else
             if options.delete(:match_all)
@@ -115,7 +115,7 @@ module ActiveRecord #:nodoc:
             join = <<-END
               INNER JOIN #{Tagging.table_name} #{taggings_alias} ON
                 #{taggings_alias}.taggable_id = #{table_name}.#{primary_key} AND
-                #{taggings_alias}.taggable_type = #{quote_value(base_class.name)}
+                #{taggings_alias}.taggable_type = #{quote_column_value(base_class.name)}
 
               INNER JOIN #{Tag.table_name} #{tags_alias} ON
                 #{taggings_alias}.tag_id = #{tags_alias}.id AND
@@ -134,6 +134,10 @@ module ActiveRecord #:nodoc:
         def tag_counts(options = {})
           scope_for_tag_counts(options)
         end
+
+        def quote_column_value(name)
+          "'" + connection.quote_string(name) + "'"
+        end
         
         def scope_for_tag_counts(options = {})
           options = options.dup
@@ -142,7 +146,7 @@ module ActiveRecord #:nodoc:
           conditions = []
           conditions << send(:sanitize_conditions, options.delete(:conditions)) if options[:conditions]
           #conditions << send(:sanitize_conditions, scope[:conditions]) if relation && relation[:conditions]
-          conditions << "#{Tagging.quoted_table_name}.taggable_type = #{quote_value(base_class.name)}"
+          conditions << "#{Tagging.quoted_table_name}.taggable_type = #{quote_column_value(base_class.name)}"
           conditions << type_condition unless descends_from_active_record? 
           conditions.compact!
           conditions = conditions.join(" AND ")
