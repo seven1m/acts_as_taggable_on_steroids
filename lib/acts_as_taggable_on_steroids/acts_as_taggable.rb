@@ -132,10 +132,10 @@ module ActiveRecord #:nodoc:
         # 
         # See Tag.counts for available options.
         def tag_counts(options = {})
-          Tag.where(find_options_for_tag_counts(options))
+          scope_for_tag_counts(options)
         end
         
-        def find_options_for_tag_counts(options = {})
+        def scope_for_tag_counts(options = {})
           options = options.dup
           #relation = scope(:find)
           
@@ -154,7 +154,7 @@ module ActiveRecord #:nodoc:
           
           options = { :conditions => conditions, :joins => joins }.update(options)
           
-          Tag.options_for_counts(options)
+          Tag.scope_for_counts(options)
         end
         
         def caching_tag_list?

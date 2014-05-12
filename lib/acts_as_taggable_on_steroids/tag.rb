@@ -34,10 +34,10 @@ class Tag < ActiveRecord::Base
     #  :at_least - Exclude tags with a frequency less than the given value
     #  :at_most - Exclude tags with a frequency greater than the given value
     def counts(options = {})
-      find(:all, options_for_counts(options))
+      scope_for_counts(options).all
     end
     
-    def options_for_counts(options = {})
+    def scope_for_counts(options = {})
       options.assert_valid_keys :start_at, :end_at, :conditions, :at_least, :at_most, :order, :limit, :joins
       options = options.dup
       
@@ -51,21 +51,23 @@ class Tag < ActiveRecord::Base
       ].compact
       
       conditions = conditions.join(' AND ') if conditions.any?
+
+      scope = where(conditions)
       
       joins = ["INNER JOIN #{Tagging.table_name} ON #{Tag.table_name}.id = #{Tagging.table_name}.tag_id"]
       joins << options.delete(:joins) if options[:joins]
-      
+
+      scope = scope.joins(joins)
+
+      scope = scope.group("#{Tag.table_name}.id, #{Tag.table_name}.name")
+
       at_least  = sanitize_sql(['COUNT(*) >= ?', options.delete(:at_least)]) if options[:at_least]
       at_most   = sanitize_sql(['COUNT(*) <= ?', options.delete(:at_most)]) if options[:at_most]
-      having    = [at_least, at_most].compact.join(' AND ')
-      group_by  = "#{Tag.table_name}.id, #{Tag.table_name}.name HAVING COUNT(*) > 0"
-      group_by << " AND #{having}" unless having.blank?
-      
-      { :select     => "#{Tag.table_name}.id, #{Tag.table_name}.name, COUNT(*) AS count", 
-        :joins      => joins.join(" "),
-        :conditions => conditions,
-        :group      => group_by
-      }.update(options)
+      ['COUNT(*) > 0', at_least, at_most].compact.each do |having|
+        scope = scope.having(having)
+      end
+
+      scope.select("#{Tag.table_name}.id, #{Tag.table_name}.name, COUNT(*) AS count")
     end
   end
 end
