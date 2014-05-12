@@ -7,7 +7,7 @@ module ActiveRecord #:nodoc:
       
       module ClassMethods
         def acts_as_taggable
-          has_many :taggings, :as => :taggable, :dependent => :destroy, :include => :tag
+          has_many :taggings, -> { includes(:tag) }, :as => :taggable, :dependent => :destroy
           has_many :tags, :through => :taggings
           
           before_save :save_cached_tag_list
@@ -132,7 +132,7 @@ module ActiveRecord #:nodoc:
         # 
         # See Tag.counts for available options.
         def tag_counts(options = {})
-          Tag.find(:all, find_options_for_tag_counts(options))
+          Tag.where(find_options_for_tag_counts(options))
         end
         
         def find_options_for_tag_counts(options = {})
@@ -197,7 +197,7 @@ module ActiveRecord #:nodoc:
           
           self.class.transaction do
             if old_tags.any?
-              taggings.find(:all, :conditions => ["tag_id IN (?)", old_tags.map(&:id)]).each(&:destroy)
+              taggings.where("tag_id IN (?)", old_tags.map(&:id)).each(&:destroy)
               taggings.reset
             end
             
