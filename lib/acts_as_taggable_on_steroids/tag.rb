@@ -67,6 +67,8 @@ class Tag < ActiveRecord::Base
         scope = scope.having(having)
       end
 
+      scope = scope.order(options.delete(:order)) if options[:order]
+
       scope.select("#{Tag.table_name}.id, #{Tag.table_name}.name, COUNT(*) AS count")
     end
   end
