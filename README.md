@@ -2,7 +2,7 @@
 
 This plugin is based on acts\_as\_taggable by DHH but includes extras such as tests, smarter tag assignment, and tag cloud calculations.
 
-This particular fork ([seven1m/acts_as_taggable_on_steroids](https://github.com/seven1m/acts_as_taggable_on_steroids)) was made to add support Ruby 2.1 and Rails 4.x. I haven't yet tested with Rails 4.1 but intend to do so soon.
+This particular fork ([seven1m/acts_as_taggable_on_steroids](https://github.com/seven1m/acts_as_taggable_on_steroids)) was made to add support for Ruby 2.1 and Rails 4.x. I haven't yet tested with Rails 4.1 but intend to do so soon.
 
 Original repo was by [Jonathan Viney](jonathan.viney@gmail.com).
 
