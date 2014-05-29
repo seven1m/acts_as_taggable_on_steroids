@@ -164,6 +164,6 @@ Tag.destroy_unused = true
 
 ## Bugs?
 
-This fork was made by [Tim Morgan](https://github.com/seven1m), but I don't maintain it beyond what is neede for my own project.
+This fork was made by [Tim Morgan](https://github.com/seven1m), but I don't maintain it beyond what is needed for my own project.
 
 If you find a bug, please fork the repo and fix it.
