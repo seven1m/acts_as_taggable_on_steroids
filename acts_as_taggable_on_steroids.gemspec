@@ -25,7 +25,7 @@ Gem::Specification.new do |s|
     "lib/acts_as_taggable_on_steroids/tags_helper.rb",
     "MIT-LICENSE",
     "Rakefile",
-    "README",
+    "README.md",
     ]
   s.test_files = [  
     "test/abstract_unit.rb",
